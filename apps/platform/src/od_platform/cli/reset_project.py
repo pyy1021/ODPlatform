@@ -158,18 +158,29 @@ def _scan_targets() -> tuple[list[tuple[Path, int, int]], list[Path]]:
             skipped.append(d)
             continue
 
+        # 只统计【非 git 追踪】的文件:runs/README.md、models/trained/README.md
+        # 这类占位文件属于仓库内容,不算"运行时产物"——只剩它们时该目录就是干净的
+        tracked = set(_git_tracked_files(d))
         file_count = 0
         total_size = 0
         try:
             for f in d.rglob("*"):
-                if f.is_file():
-                    file_count += 1
-                    try:
-                        total_size += f.stat().st_size
-                    except OSError:
-                        pass
+                if not f.is_file():
+                    continue
+                if f.relative_to(ROOT_DIR).as_posix() in tracked:
+                    continue
+                file_count += 1
+                try:
+                    total_size += f.stat().st_size
+                except OSError:
+                    pass
         except OSError as e:
             logger.warning(f"扫描 {d} 时出错: {e}")
+
+        if file_count == 0:
+            # 目录不存在、或只剩 git 占位文件——没有可清理的运行时产物
+            skipped.append(d)
+            continue
 
         deletable.append((d, file_count, total_size))
 

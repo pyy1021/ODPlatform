@@ -37,7 +37,7 @@ dependencies = [
     "torch>=2.0.0",
     "ultralytics>=8.0.0",
     "pyyaml>=6.0",
-    "pydantic>=2.0",
+    "pydantic>=2.5,<3",
 ]
 
 [project.optional-dependencies]
@@ -54,10 +54,11 @@ dev = [
 # Entry-point Scripts (PEP 621 标准字段, 与 backend 无关)
 # =============================================================================
 [project.scripts]
-odp-init = "od_platform.cli.init_project:initialize_project"
-odp-reset = "od_platform.cli.reset_project:main"
-odp-transform = "od_platform.cli.transform_data:main"
-odp-validate = "od_platform.cli.validate_data:main"
+odp-init        = "od_platform.cli.init_project:initialize_project"  # D1
+odp-reset       = "od_platform.cli.reset_project:main"               # D2
+odp-transform   = "od_platform.cli.transform_data:main"              # D3
+odp-validate    = "od_platform.cli.validate_data:main"               # D4
+odp-gen-config  = "od_platform.runtime_config.generator:main"        # ★ D5(步骤 5 落地)
 
 
 # =============================================================================
@@ -71,3 +72,22 @@ packages = ["src/od_platform"]
 # 动态版本号: 从 src/od_platform/_version.py 的 __version__ 读
 [tool.hatch.version]
 path = "src/od_platform/_version.py"
+
+
+# =============================================================================
+# Pytest 配置(在 apps/platform 目录下跑测试时生效; 仓库根跑时用根 pyproject)
+# =============================================================================
+[tool.pytest.ini_options]
+testpaths        = ["tests"]
+python_files     = ["test_*.py"]
+python_classes   = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--strict-markers",      # 拼错的 mark 立刻报错,不再静默不跑
+    "--tb=short",
+]
+filterwarnings = [
+    # 业务代码用 warnings.warn 发的提示,测试里要能捕获
+    "default::UserWarning",
+]

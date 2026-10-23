@@ -108,6 +108,31 @@ META_LOGGING_DIR: Path = META_DIR / "logs"
 
 
 # ============================================================
+# D5 增量: 运行配置目录 (跟 D3 立的 DATASET_CONFIGS_DIR 语义完全不同)
+#   DATASET_CONFIGS_DIR: 描述【数据】的 yaml (odp-transform 产出)
+#   RUNTIME_CONFIGS_DIR : 描述【跑法】的 yaml (runtime_config 子系统产出)
+# 两类 yaml 物理分目录, 语义不会互相污染.
+# ============================================================
+RUNTIME_CONFIGS_DIR: Path = CONFIGS_DIR / "runtime"
+
+
+def runtime_config_path(name: str) -> Path:
+    """返回某个运行配置文件的路径: <CONFIGS_DIR>/runtime/<name>.yaml
+
+    Args:
+        name: 配置名 (如 "train" / "val" / "infer"), 不带 .yaml 后缀
+
+    Returns:
+        Path 对象 (尚未创建, 调用方自己负责 mkdir)
+
+    用法:
+        train_yaml = runtime_config_path("train")
+        # → <APP_DIR>/configs/runtime/train.yaml
+    """
+    return RUNTIME_CONFIGS_DIR / f"{name}.yaml"
+
+
+# ============================================================
 # 对外暴露的"要初始化的目录列表"
 # ============================================================
 def get_dirs_to_initialize() -> List[Path]:
@@ -139,6 +164,7 @@ def get_dirs_to_initialize() -> List[Path]:
         # 工具元数据(reset 等元工具的审计日志位置)
         META_LOGGING_DIR,
         DATASET_CONFIGS_DIR,
+        RUNTIME_CONFIGS_DIR,
     ]
 
 

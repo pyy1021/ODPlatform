@@ -138,6 +138,7 @@ def get_dirs_to_initialize() -> List[Path]:
         DOCS_DIR,
         # 工具元数据(reset 等元工具的审计日志位置)
         META_LOGGING_DIR,
+        DATASET_CONFIGS_DIR,
     ]
 
 
@@ -226,3 +227,17 @@ if __name__ == "__main__":
     print(f"\n要初始化的目录共 {len(get_dirs_to_initialize())} 个:")
     for d in get_dirs_to_initialize():
         print(f"  - {d.relative_to(ROOT_DIR)}")
+# apps/platform/src/od_platform/common/paths.py(增量:追加到文件尾部)
+
+DATASET_CONFIGS_DIR: Path = CONFIGS_DIR / "datasets"   # 数据集 yaml 的家(Ultralytics 约定)
+
+def raw_dataset_root(name: str) -> Path:
+    return RAW_DATA_DIR / name
+
+def dataset_processed_dir(name: str) -> Path:
+    return PROCESSED_DATA_DIR / name
+
+def dataset_yaml_path(name: str) -> Path:
+    return DATASET_CONFIGS_DIR / f"{name}.yaml"
+
+# 别忘了:把 DATASET_CONFIGS_DIR 加进 get_dirs_to_initialize() 的返回元组
